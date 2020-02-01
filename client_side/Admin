@@ -1,0 +1,232 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatefulWidget{
+  @override
+  MyAppState createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  static const String _title = 'Holding Title';
+  List<Widget> cards = [PatientCard('126', '12:25', "7", "Pain in lower right abdomen", 'Norco'),
+                        PatientCard('127', '12:50', "3", "Knife wound on right hand", "none"),
+                        PatientCard('128', '1:03', '5', 'I hit my head against a dresser', 'Haldol'),];
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: _title,
+      home: Scaffold(
+        appBar: AppBar(
+            title: Text('Admin'),
+            backgroundColor: Colors.blueGrey[900],
+            actions: <Widget>[
+              FlatButton(
+                child: const Icon(Icons.restore, color: Colors.white),
+                onPressed: ()async{
+                  Future<http.Response> fetchPost() {
+                    var resp = http.get('https://3.215.200.88/h/');
+                    print(resp);
+                  }
+                  
+                },
+              ),
+            ],
+        ),
+        body: patient_list(cards),
+      ),
+    );
+  }
+}
+
+class patient_list extends StatefulWidget {
+  List<Widget> array;
+  patient_list(List<Widget> array){
+    this.array = array;
+  }
+  @override
+  patient_list_State createState() => patient_list_State(array);
+}
+
+class patient_list_State extends State<patient_list> {
+  List<Widget> cards;
+  patient_list_State(List<Widget> cards){
+    this.cards = cards;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+          children: cards
+        )
+    );
+  }
+}
+
+
+class PatientCard extends StatelessWidget{
+  const PatientCard(this.name, this.date, this.pain, this.symptoms, this.medication);
+
+  final String name;
+  final String date;
+  final String pain;
+  final String symptoms;
+  final String medication;
+
+  @override
+  Widget build(BuildContext context){
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              ButtonBar(
+                children: <Widget>[
+                  FlatButton(
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          'o',
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
+                        )
+                    ),
+                  ),
+                ],
+              ),
+             Text(
+               name,
+               textAlign: TextAlign.left,
+               style: TextStyle(
+                 fontSize: 30.0
+               ),
+             ),
+             Text(date),
+            ],
+          ),
+          ButtonBar(
+            children: <Widget>[
+              FlatButton(
+                child: const Text('More Information'),
+                onPressed: () {
+                  showDialog(context: context, builder: (context) => ButtonWithDialogBox(name, date, pain, symptoms, medication), barrierDismissible: true);
+                },
+              ),
+          ButtonBar(
+            children: <Widget>[
+              FlatButton(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(Icons.delete_forever, size: 20.0,)
+                ),
+              ),
+            ],
+          ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class big_card extends StatelessWidget{
+big_card(String name, String date);
+
+@override
+Widget build(BuildContext context){
+  return Card(
+    child: Column(
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        const ListTile(
+          leading: Icon(Icons.contacts),
+          title: Text('Patient Name'),
+          subtitle: Text('The patient was admitted at 12:54, their main complaints are chest pains'),
+        ),
+        ButtonBar(
+          children: <Widget>[
+            FlatButton(
+              child: const Text('Exit'),
+              onPressed: () {/* ... */},
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+}
+
+class ButtonWithDialogBox extends StatelessWidget{
+  String name;
+  String date;
+  String pain;
+  String symptoms;
+  String medication;
+
+
+  ButtonWithDialogBox(String title, String date, String pain, String symptoms, String medication){
+    this.name = title;
+    this.date = date;
+    this.pain = pain;
+    this.symptoms = symptoms;
+    this.medication = medication;
+  }
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+          name,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 25.0
+          )
+      ),
+      content: SingleChildScrollView(
+        child: ListBody(
+        children: <Widget>[
+          Text(
+              "Admitted at: " + date,
+              style: TextStyle(
+                fontSize: 20.0
+              ),
+          ),
+          Text(
+              "Pain level: " + pain,
+              style: TextStyle(
+                fontSize: 20.0
+              ),
+          ),
+          Text(
+              'Presenting Symptoms: ' + symptoms,
+              style: TextStyle(
+                fontSize: 20.0
+              ),
+          ),
+          Text(
+              'Current Medications: ' + medication,
+            style: TextStyle(
+              fontSize: 20.0
+            )
+          ),
+
+        ],
+        ),
+      ),
+
+      actions: <Widget>[
+        FlatButton(child: Text("Dismiss"),
+          onPressed: (){
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+}
