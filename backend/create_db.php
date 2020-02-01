@@ -20,10 +20,11 @@ if ($conn->query($sql) === TRUE) {
 // sql to create table
 $sql = "CREATE TABLE HDB (
 id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-firstname VARCHAR(30) NOT NULL,
-lastname VARCHAR(30) NOT NULL,
+uniqID VARCHAR(40) NOT NULL,
+symptoms VARCHAR(40) NOT NULL,
+medications VARCHAR(40) NOT NULL,
 painscale Int(6) NOT NULL,
-reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+user_date VARCHAR(40) NOT NULL,
 )";
 
 if ($conn->query($sql) === TRUE) {

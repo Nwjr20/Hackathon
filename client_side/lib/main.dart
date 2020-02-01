@@ -100,6 +100,14 @@ class FormPageState extends State<FormPage>{
     showDialog(context: context, builder: (context) => customWidgets.InputBox("Add your symptom"), barrierDismissible: false);
   }
 
+  String fromArrayToString(List<String> array){
+    String content = ",";
+    for(int i; i<array.length;i++){
+      content = content + array[i] + ",";
+    }
+    return content;
+  }
+
 
   Future<void> _onClick() async {
     String rand_strign = randomString(15);

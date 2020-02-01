@@ -2,12 +2,11 @@
 
 include "creds.php";
 
-
+$unique_id = $_POST["uniqueid"];
 $pain_rating = $_POST["painrating"];
 $current_time = $_POST["currenttime"];
 $_medications = $_POST["medications"];
 $_symptoms = $_POST["symptoms"];
-
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -16,17 +15,16 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "INSERT INTO myHDB (firstname, lastname, email)
-VALUES ('John', 'Doe', 'john@example.com')";
+$sql = "INSERT INTO HDB (uniqID, symptoms, medications, painscale, user_date)
+VALUES ($unique_id, _symptoms, _medications, $pain_rating, $current_time)";
 
 if ($conn->query($sql) === TRUE) {
-    echo "New record created successfully";
+    echo "Success";
 } else {
     echo "Error: " . $sql . "<br>" . $conn->error;
 }
 
 $conn->close();
-
 
 
 ?>
