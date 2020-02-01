@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import "custom_widgets.dart" as customWidgets;
+import "globals.dart" as globals;
+import 'package:http/http.dart' as http;
+import 'package:random_string/random_string.dart';
 
 void main() => runApp(MyApp());
 
@@ -7,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: globals.banner,
       title: 'Hackathon Project',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -16,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MyHomePage(title: 'Hackathon Project'),
         '/form': (context) => FormPage(),
+        '/thankyou': (context) => ThankYou(),
       },
     );
   }
@@ -83,30 +88,51 @@ class FormPage extends StatefulWidget {
 
 class FormPageState extends State<FormPage>{
   int _painScale = 0;
-  TextEditingController _symptomController = TextEditingController();
   TextEditingController _medicationsController = TextEditingController();
+  
   //  String text = _symptomController.text;
   //TextEditingController _paincontroller = TextEditingController();
-  Future<void> _onClick() async {
-    // Get the text from the entry
-    // Check to make sure that the message is not empty
-    /*if (text == '' || text == ' '){
-      message = "Please enter your message";
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-      return 1;
-    } else {
-      // Check if the value of _last message is text, this prevents unnesssiary requests
-      // from going to the web server
-      if (_lastMessage == text && _lastPick == _selectedMirror){
-        print("Did not send message ");
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
-        return 1;
-      } else {
-        _lastMessage = text;
-        _lastPick = _selectedMirror;
-      }
-    }*/
+
+  // Add a symptom to the symptoms list
+  void _addSymptom(){
+    //customWidgets.InputBox();
+    setState(() {});
+    showDialog(context: context, builder: (context) => customWidgets.InputBox("Add your symptom"), barrierDismissible: false);
   }
+
+
+  Future<void> _onClick() async {
+    String rand_strign = randomString(15);
+    DateTime now = new DateTime.now();
+    DateTime time = new DateTime(now.year, now.month, now.day, now.hour, now.minute, now.second);
+    print("The pain scale is set at: $_painScale");
+    print("The time is set at: $time");
+    print("The medications listed are: $_medicationsController.text");
+    print(globals.symptoms);
+    print("Random user string is: $rand_strign")
+    //globals.symptoms is a list of strings
+     var response = await http.post(
+      "http://3.215.200.88/", 
+      body: {}
+      );
+     
+
+    if (response.statusCode == 200){
+      print("We good...");
+      // Clear out the text field when finished
+      _medicationsController.clear();
+      globals.symp = [];
+      globals.symptoms = [];
+      // Dismiss the keyboard
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    } else {
+      // The message did not send
+      print("Error, the message did NOT SEND");
+    }
+    // Then change the menu screen out to the main view
+    Navigator.pushNamed(context, '/thankyou');
+  }
+  
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -151,18 +177,22 @@ class FormPageState extends State<FormPage>{
               ],),
             SizedBox(
               height: 50
-            ), 
-            TextField(
-              textAlign: TextAlign.center,
-              autocorrect: true,
-              textCapitalization: TextCapitalization.sentences,
-              keyboardType: TextInputType.multiline,
-              maxLines: 2,
-              controller: _symptomController,
-              decoration: InputDecoration(
-                hintText: 'Describe your symptoms here...',
-              ),
             ),
+            // const RoundedButton(this.title, this.onPressed, this.fontSize, this.width, this.height, this.color);
+            customWidgets.RoundedButton("Add Symptom", _addSymptom, 15, 25, 25, Colors.lightBlue),
+            CustomScrollView(
+              shrinkWrap: true,
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: const EdgeInsets.all(20.0),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate(
+                      globals.symp,
+                    ),
+                  ),
+                ),
+              ],
+        ),
             SizedBox(height: 30,),
             TextField(
               textAlign: TextAlign.center,
@@ -175,9 +205,58 @@ class FormPageState extends State<FormPage>{
                 hintText: 'What medications do you take?',
               ),
             ),
+            SizedBox(height: 50,), 
+            // Submit button
+            customWidgets.RoundedButton("Submit", _onClick, 20, 50, 50, Colors.lightBlue),
           ],
           )
         )
+    );
+  }
+}
+
+class ThankYou extends StatefulWidget{
+  @override
+  ThankYouState createState() => ThankYouState();
+}
+
+class ThankYouState extends State<ThankYou>{
+  String waittime = "";
+  Future<void> _getwaittime() async {
+    var request = await http.get("http://3.215.200.88/h/get_wait_time.php");
+    if (request.statusCode == 200){
+      setState(() {
+        waittime = request.body;
+      });
+    } else if (request.statusCode == 404){
+      setState(() {
+        waittime = "Server error -- not found";
+      });
+    }
+    
+  }
+
+  @override
+  Widget build (BuildContext context){
+    _getwaittime();
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blueGrey[900],
+      ),
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: 50,),
+            Text(
+              "You are signed in! Please wait for further instructions... \n\n\nYour estimated wait time is: $waittime",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+          ], 
+        ),
+      ),
     );
   }
 }

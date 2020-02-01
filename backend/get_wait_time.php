@@ -1,13 +1,10 @@
+// Gets the wait time for the user in the async function
+
 <?php
-
-include "creds.php";
-
-
-$pain_rating = $_POST["painrating"];
-$current_time = $_POST["currenttime"];
-$_medications = $_POST["medications"];
-$_symptoms = $_POST["symptoms"];
-
+$servername = "localhost";
+$username = "username";
+$password = "password";
+$dbname = "mainHDB";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -16,7 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "INSERT INTO myHDB (firstname, lastname, email)
+$sql = "INSERT INTO MyGuests (firstname, lastname, email)
 VALUES ('John', 'Doe', 'john@example.com')";
 
 if ($conn->query($sql) === TRUE) {
@@ -26,7 +23,6 @@ if ($conn->query($sql) === TRUE) {
 }
 
 $conn->close();
-
 
 
 ?>
